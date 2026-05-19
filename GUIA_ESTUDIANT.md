@@ -85,4 +85,4 @@ L'objectiu d'aquesta pràctica és ajudar els estudiants a veure com poden imple
 
 Tots els conceptes implementats en aquesta evolució us donaran la base necessària per enfrontar-vos amb garanties al desenvolupament del **Projecte Final** de l'assignatura.
 
-> **Criteri d'avaluació**: Per aprovar l'assignatura cal implementar totes les funcionalitats obligatòries definides a l'enunciat (6 punts sobre 10). A més, cal afegir 3 funcionalitats opcionals: `likes`, `comentaris` i una tercera opció lliure que cal acordar amb el professor (1 punt cada una). Finalment, la memòria s'avaluarà també amb 1 punt.
+> **Criteri d'avaluació**: Per aprovar l'assignatura cal implementar totes les funcionalitats obligatòries definides a l'enunciat (6 punts sobre 10). Per obtenir més nota, cal afegir 3 funcionalitats opcionals: `likes`, `comentaris` i una tercera opció lliure que cal acordar amb el professor (1 punt cada una). Finalment, la memòria s'avaluarà també amb 1 punt.

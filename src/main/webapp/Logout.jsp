@@ -1,11 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="false"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 
 <script type="text/javascript">
 $(document).ready(function(){
-	$('#navigation').load('Menu');
-	$('#rcolumn').html('<p/>');
-	$('#lcolumn').html('<p/>');
+	$('#navigation').load("Menu");
+	$('#rcolumn').load("NotFollowed");
+	$('#lcolumn').load("Profile");
 });
 </script>
 
