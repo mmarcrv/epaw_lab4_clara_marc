@@ -1,9 +1,8 @@
 package epaw.lab4.service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 import epaw.lab4.model.User;
 import epaw.lab4.repository.UserRepository;
@@ -16,7 +15,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Set;
 
 public class UserService {
 
@@ -28,9 +26,7 @@ public class UserService {
     }
 
     public static synchronized UserService getInstance() {
-        if (instance == null) {
-            instance = new UserService();
-        }
+        if (instance == null) instance = new UserService();
         return instance;
     }
 
@@ -92,8 +88,7 @@ public class UserService {
             errors.put("dateOfBirth", "La data de naixement no pot estar buida.");
         } else {
             try {
-                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-                LocalDate birthDate = LocalDate.parse(dateOfBirth, formatter);
+                LocalDate birthDate = LocalDate.parse(dateOfBirth, DateTimeFormatter.ISO_DATE);
                 if (birthDate.isAfter(LocalDate.now())) {
                     errors.put("dateOfBirth", "La data de naixement no pot ser en el futur.");
                 }
@@ -121,58 +116,19 @@ public class UserService {
     public Map<String, String> login(User user) {
         Map<String, String> errors = new HashMap<>();
         if (!userRepository.checkLogin(user)) {
-            errors.put("password", "The combination of name and password does not match in our dataabase");
+            errors.put("password", "The combination of name and password does not match in our database.");
         }
         return errors;
     }
 
-        // Get all users
-    public List<User> getAllUsers() {
-    	Optional<List<User>> users = userRepository.findAll();
-    	if (users.isPresent())
-    	    return users.get();
-        return null;
-    }
-    
-    // Get followed users
-    public List<User> getFollowedUsers(Integer id, Integer start, Integer end) {
-    	Optional<List<User>> users = userRepository.findFollowed(id,start,end);
-    	if (users.isPresent())
-    	    return users.get();
-        return null;
-    }
-    
-    // Get unfollowed users
-    public List<User> getNotFollowedUsers(Integer id, Integer start, Integer end) {
-    	Optional<List<User>> users = userRepository.findNotFollowed(id,start,end);
-    	if (users.isPresent())
-    	    return users.get();
-        return null;
-    }
-    
-    // Follow User
-    public void follow(Integer uid,Integer fid) {
-    	userRepository.followUser(uid, fid);
-    }
-    
-    // Unfollow User
-    public void unfollow(Integer uid,Integer fid) {
-    	userRepository.unfollowUser(uid, fid);
-    }
-
     public String saveProfilePicture(Part filePart, String username) {
-        if (filePart == null || filePart.getSize() <= 0) {
-            return null;
-        }
-
+        if (filePart == null || filePart.getSize() <= 0) return null;
         try {
             String fileName = filePart.getSubmittedFileName();
             String extension = fileName.substring(fileName.lastIndexOf("."));
             String newFileName = username + extension;
-
             String resourcesDir = "EXTERNAL_RESOURCES";
             Files.createDirectories(Paths.get(resourcesDir));
-
             try (InputStream input = filePart.getInputStream()) {
                 Files.copy(input, Paths.get(resourcesDir, newFileName), StandardCopyOption.REPLACE_EXISTING);
             }
@@ -182,6 +138,4 @@ public class UserService {
             return null;
         }
     }
-
-
 }

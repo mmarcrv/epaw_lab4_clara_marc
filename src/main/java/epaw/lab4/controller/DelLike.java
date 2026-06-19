@@ -7,12 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import epaw.lab4.model.User;
-import epaw.lab4.service.FollowService;
+import epaw.lab4.service.LikeService;
 
 import java.io.IOException;
 
-@WebServlet("/Follow")
-public class Follow extends HttpServlet {
+@WebServlet("/DelLike")
+public class DelLike extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -21,8 +21,8 @@ public class Follow extends HttpServlet {
             User user = (User) session.getAttribute("user");
             if (user != null) {
                 try {
-                    int fid = Integer.parseInt(request.getParameter("id"));
-                    FollowService.getInstance().follow(user.getId(), fid);
+                    int tweetId = Integer.parseInt(request.getParameter("id"));
+                    LikeService.getInstance().removeLike(tweetId, user.getId());
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }

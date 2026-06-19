@@ -3,8 +3,6 @@ package epaw.lab4.repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import epaw.lab4.model.User;
@@ -13,51 +11,39 @@ public class UserRepository extends BaseRepository {
 
     private static UserRepository instance;
 
-    private UserRepository() {
-        super();
-    }
+    private UserRepository() { super(); }
 
     public static synchronized UserRepository getInstance() {
-        if (instance == null) {
-            instance = new UserRepository();
-        }
+        if (instance == null) instance = new UserRepository();
         return instance;
     }
 
     public boolean existsByUsername(String username) {
         String query = "SELECT COUNT(*) FROM users WHERE name = ?";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-            statement.setString(1, username);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
     public boolean existsByEmail(String email) {
         String query = "SELECT COUNT(*) FROM users WHERE email = ?";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-            statement.setString(1, email);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
     public boolean checkLogin(User user) {
         String query = "SELECT id, picture, role FROM users WHERE name=? AND password=?";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getPassword());
-            try (ResultSet rs = statement.executeQuery()) {
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getPassword());
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     user.setId(rs.getInt("id"));
                     user.setPicture(rs.getString("picture"));
@@ -65,34 +51,30 @@ public class UserRepository extends BaseRepository {
                     return true;
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
     public void save(User user) {
         String query = "INSERT INTO users (name, password, picture, firstName, lastName, email, dateOfBirth, comarca) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getPassword());
-            statement.setString(3, user.getPicture());
-            statement.setString(4, user.getFirstName());
-            statement.setString(5, user.getLastName());
-            statement.setString(6, user.getEmail());
-            statement.setString(7, user.getDateOfBirth());
-            statement.setString(8, user.getComarca());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getPassword());
+            stmt.setString(3, user.getPicture());
+            stmt.setString(4, user.getFirstName());
+            stmt.setString(5, user.getLastName());
+            stmt.setString(6, user.getEmail());
+            stmt.setString(7, user.getDateOfBirth());
+            stmt.setString(8, user.getComarca());
+            stmt.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
     public Optional<User> findByName(String name) {
         String query = "SELECT id, name, password, picture, firstName, lastName, email, dateOfBirth, comarca, role FROM users WHERE name = ?";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-            statement.setString(1, name);
-            ResultSet rs = statement.executeQuery();
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setString(1, name);
+            ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 User user = new User();
                 user.setId(rs.getInt("id"));
@@ -107,122 +89,7 @@ public class UserRepository extends BaseRepository {
                 user.setRole(rs.getString("role"));
                 return Optional.of(user);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
         return Optional.empty();
     }
-
-    // Find a user by their name
-    public Optional<User> findById(Integer id) {
-        String query = "SELECT id, name, picture FROM users WHERE id = ?";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-        	statement.setInt(1, id);
-            try (ResultSet rs = statement.executeQuery()) {
-	            if (rs.next()) {
-	                User user = new User();
-	                user.setId(rs.getInt("id"));
-	                user.setName(rs.getString("name"));
-	                user.setPicture(rs.getString("picture"));
-	                return Optional.of(user);
-	            }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-    
-    // Retrieve all users from the database
-    public Optional<List<User>> findAll() {
-        List<User> users = new ArrayList<>();
-        String query = "SELECT id, name, picture FROM users";
-        try (PreparedStatement statement = db.prepareStatement(query)) {
-            try (ResultSet rs = statement.executeQuery()) {
-	            while (rs.next()) {
-	                User user = new User();
-	                user.setId(rs.getInt("id"));
-	                user.setName(rs.getString("name"));
-	                user.setPicture(rs.getString("picture"));
-	                users.add(user);
-	            }
-	            return Optional.of(users);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return Optional.empty();
-    }
-    
-	// Follow a user
-	public void followUser(Integer uid, Integer fid) {
-		String query = "INSERT INTO follows (uid,fid) VALUES (?,?)";
-		try (PreparedStatement statement = db.prepareStatement(query)) {
-			statement.setInt(1, uid);
-			statement.setInt(2, fid);
-			statement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// Unfollow a user
-	public void unfollowUser(Integer uid, Integer fid) {
-		String query = "DELETE FROM follows WHERE uid = ? AND fid = ?";
-		try (PreparedStatement statement = db.prepareStatement(query)) {
-			statement.setInt(1, uid);
-			statement.setInt(2, fid);
-			statement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}    
-    
-	public Optional<List<User>> findNotFollowed(Integer id, Integer start, Integer end) {
-		String query = "SELECT id,name,picture FROM users WHERE id NOT IN (SELECT id FROM users,follows WHERE id = fid AND uid = ?) AND id <> ? ORDER BY name LIMIT ?,?;";
-		try (PreparedStatement statement = db.prepareStatement(query)) {
-			statement.setInt(1, id);
-			statement.setInt(2, id);
-			statement.setInt(3, start);
-			statement.setInt(4, end);
-			try (ResultSet rs = statement.executeQuery()) {
-				List<User> users = new ArrayList<User>();
-				while (rs.next()) {
-					User user = new User();
-					user.setId(rs.getInt("id"));
-					user.setName(rs.getString("name"));
-					user.setPicture(rs.getString("picture"));
-					users.add(user);
-				}
-				return Optional.of(users);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return Optional.empty();
-	}
-
-	public Optional<List<User>> findFollowed(Integer id, Integer start, Integer end) {
-		String query = "SELECT id,name,picture FROM users,follows WHERE id = fid AND uid = ? ORDER BY name LIMIT ?,?;";
-		try (PreparedStatement statement = db.prepareStatement(query)) {
-			statement.setInt(1, id);
-			statement.setInt(2, start);
-			statement.setInt(3, end);
-			try (ResultSet rs = statement.executeQuery()) {
-				List<User> users = new ArrayList<User>();
-				while (rs.next()) {
-					User user = new User();
-					user.setId(rs.getInt("id"));
-					user.setName(rs.getString("name"));
-					user.setPicture(rs.getString("picture"));
-					users.add(user);
-				}
-				return Optional.of(users);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return Optional.empty();
-	}
 }
