@@ -17,6 +17,8 @@ public class Tweet implements java.io.Serializable {
     private int likes;
     private int comments;
     private boolean isParent = true;
+    private String category;
+    private String location;
 
     public Tweet() {}
 
@@ -54,4 +56,10 @@ public class Tweet implements java.io.Serializable {
     public void setIsParent(boolean isParent) { this.isParent = isParent; }
 
     public boolean isReply() { return !this.isParent; }
+
+    public String getCategory() { return this.category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getLocation() { return this.location; }
+    public void setLocation(String location) { this.location = location; }
 }

@@ -25,11 +25,17 @@ public class Tweets extends HttpServlet {
         User user = null;
         HttpSession session = request.getSession(false);
 
+        String categoryFilter = request.getParameter("category");
         Set<Integer> likedIds = new HashSet<>();
         if (session != null) {
             user = (User) session.getAttribute("user");
             if (user != null) {
                 tweets = TweetService.getInstance().getTimeline(user.getId(), 0, 20);
+                if (categoryFilter != null && !categoryFilter.isEmpty()) {
+                    tweets = tweets.stream()
+                        .filter(t -> categoryFilter.equals(t.getCategory()))
+                        .collect(java.util.stream.Collectors.toList());
+                }
                 likedIds = LikeService.getInstance().getLikedTweetIds(user.getId(), tweets);
             }
         }

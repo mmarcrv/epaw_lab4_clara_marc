@@ -3,22 +3,42 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-    $('#rcolumn').load('NotFollowed');
-    $('#lcolumn').load('Profile');
-    $('#iterator').load('Tweets');
+  App.setLayout('full');
+  $('#rcolumn').load('HomeRight', function(){ lucide.createIcons(); });
+  $('#iterator').load('Tweets', function(){ lucide.createIcons(); });
 });
 </script>
 
-<div class="w3-container w3-card w3-round w3-white w3-section">
-    <h6 class="w3-opacity"> ${user.name}, what are you thinking? </h6>
-    <input id="tweetTitle" type="text" placeholder="Title..." class="w3-input w3-border w3-margin-bottom" maxlength="255">
-    <p id="tweetBody" contenteditable="true" class="w3-border w3-padding" style="min-height:60px"> </p>
-    <input id="tweetPicture" type="file" accept="image/*" class="w3-margin-bottom" style="display:block">
-    <button id="addTweet" type="button" class="w3-button w3-theme w3-section">
-        <i class="fa fa-pencil"></i> &nbsp;Post
-    </button>
+<!-- Hero -->
+<div class="pc-hero">
+  <h2>Troba el teu pis perfecte a Catalunya</h2>
+  <p>Connecta amb estudiants, busca companys de pis i descobreix les millors zones per viure</p>
+  <div class="pc-search-wrap">
+    <i data-lucide="search"></i>
+    <input type="text" id="searchInput" placeholder="Cerca per zona, ciutat o categoria...">
+  </div>
+  <div class="pc-filters">
+    <button class="pc-filter-btn active" data-cat="">Tots</button>
+    <button class="pc-filter-btn" data-cat="Busco company">Busco company</button>
+    <button class="pc-filter-btn" data-cat="Oferta habitació">Oferta habitació</button>
+    <button class="pc-filter-btn" data-cat="Ressenya residència">Ressenyes</button>
+    <button class="pc-filter-btn" data-cat="Recomanació zona">Recomanacions</button>
+  </div>
 </div>
 
-<div id="iterator">
-<!-- Tweets will be loaded here -->
-</div>
+<!-- Feed -->
+<div id="iterator"></div>
+
+<script>
+$(document).ready(function(){
+  lucide.createIcons();
+  /* Client-side text search */
+  $('#searchInput').on('input', function(){
+    var q = $(this).val().toLowerCase();
+    $('.tweet-card').each(function(){
+      var text = $(this).text().toLowerCase();
+      $(this).toggle(text.includes(q));
+    });
+  });
+});
+</script>

@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang=en>
+<html lang="ca">
 
 <head>
 	<meta charset="UTF-8">
-	<link rel="icon" href="assets/upf.png">
-	<title> U </title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-	<link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-	<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link rel="stylesheet" href="css/style.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="assets/upf.png">
+	<title>PisCompany</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/style.css">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
 	<script>
 		window.App = window.App || {};
 		App.Errors = App.Errors || {};
+		App.currentLang = "ca";
 	</script>
 	<script src="js/LoginValidation.js"></script>
 	<script src="js/RegisterValidation.js"></script>
@@ -21,121 +25,126 @@
 	<script>
 		App.init = function () {
 			$.ajaxSetup({ cache: false });
-			$('#navigation').load("Menu");
-			$('#content').load("Content");
-			$('#lcolumn').load("Profile");
-			$('#rcolumn').load("NotFollowed");
+			$('#navigation').load("Menu", function () { lucide.createIcons(); });
+			$('#content').load("Content", function () { lucide.createIcons(); });
 			App.bindEvents();
+			App.applyAccessibility();
 		};
+
+		App.setLayout = function (type) {
+			var wrapper = $('#page-wrapper');
+			if (type === 'simple') {
+				wrapper.addClass('layout-simple');
+			} else {
+				wrapper.removeClass('layout-simple');
+			}
+			lucide.createIcons();
+		};
+
+		App.icons = function () { lucide.createIcons(); };
 
 		App.bindEvents = function () {
 			/* Menu navigation */
 			$(document).on("click", ".menu", function (event) {
 				event.preventDefault();
-				$('#content').load($(this).attr('href'));
+				$('#content').load($(this).attr('href'), function () { lucide.createIcons(); });
 				App.stack();
 			});
 
-			/* Form submission via AJAX — uses .load() for non-file forms so scripts execute */
+			/* Form submission via AJAX */
 			$(document).on("submit", "form", function (event) {
 				if (event.isDefaultPrevented() || !this.checkValidity()) return;
 				event.preventDefault();
 				var form = this;
 				var url = $(form).attr('action');
 				var hasFiles = $(form).find('input[type="file"]').length > 0;
-
 				if (hasFiles) {
-					/* Multipart form (e.g. Register with picture upload) */
 					$.ajax({
-						type: 'POST',
-						url: url,
+						type: 'POST', url: url,
 						data: new FormData(form),
-						processData: false,
-						contentType: false
+						processData: false, contentType: false
 					}).done(function (html) {
-						$('#navigation').load("Menu");
-						$('#lcolumn').load("Profile");
-						$('#rcolumn').load("NotFollowed");
-						/* $.parseHTML amb keepScripts=true + append() executa els scripts del fragment */
+						$('#navigation').load("Menu", function () { lucide.createIcons(); });
 						$("#content").empty().append($.parseHTML(html, document, true));
+						lucide.createIcons();
 					});
 				} else {
-					/* Regular form: serialitzem com a objecte (no string!) perquè .load() enviï POST */
 					var formObj = {};
-					$(form).serializeArray().forEach(function(f) { formObj[f.name] = f.value; });
+					$(form).serializeArray().forEach(function (f) { formObj[f.name] = f.value; });
 					$("#content").load(url, formObj, function () {
-						$('#navigation').load("Menu");
-						$('#lcolumn').load("Profile");
-						$('#rcolumn').load("NotFollowed");
+						$('#navigation').load("Menu", function () { lucide.createIcons(); });
+						lucide.createIcons();
 					});
 				}
 			});
 
-			/* Follow user (envia sol·licitud, l'usuari desapareix de suggeriments) */
+			/* Follow user */
 			$(document).on("click", ".followUser", function (event) {
 				event.preventDefault();
-				var id = $(this).parent().attr("id");
+				var id = $(this).closest('[id]').attr("id");
 				$.post("Follow", { id: id }, function () {
-					$("#rcolumn").load("NotFollowed");
+					$('#rcolumn').load($('#rcolumn').data('load') || 'HomeRight', function () { lucide.createIcons(); });
 				});
 			});
 
 			/* Unfollow user */
 			$(document).on("click", ".unfollowUser", function (event) {
 				event.preventDefault();
-				var id = $(this).parent().attr("id");
+				var id = $(this).closest('[id]').attr("id");
 				$.post("Unfollow", { id: id }, function () {
-					$("#content").load("Followed");
-					$("#rcolumn").load("NotFollowed");
+					$("#content").load("Followed", function () { lucide.createIcons(); });
+					$('#rcolumn').load('HomeRight', function () { lucide.createIcons(); });
 				});
 			});
 
-			/* Acceptar sol·licitud de seguiment */
+			/* Accept follow request */
 			$(document).on("click", ".acceptRequest", function (event) {
 				event.preventDefault();
-				var from = $(this).parent().attr("id");
+				var from = $(this).closest('[id]').attr("id");
 				$.post("AcceptFollow", { from: from }, function () {
-					$("#content").load("Requests");
-					$("#lcolumn").load("Profile");
+					$('#rcolumn').load('HomeRight', function () { lucide.createIcons(); });
 				});
 			});
 
-			/* Rebutjar sol·licitud de seguiment */
+			/* Reject follow request */
 			$(document).on("click", ".rejectRequest", function (event) {
 				event.preventDefault();
-				var from = $(this).parent().attr("id");
+				var from = $(this).closest('[id]').attr("id");
 				$.post("RejectFollow", { from: from }, function () {
-					$("#content").load("Requests");
+					$('#rcolumn').load('HomeRight', function () { lucide.createIcons(); });
 				});
 			});
 
-			/* Add tweet */
+			/* Add tweet (Publicar) */
 			$(document).on("click", "#addTweet", function (event) {
 				event.preventDefault();
-				var title = $("#tweetTitle").val().trim();
-				var textBody = $("#tweetBody").text().trim();
-				if (!title || !textBody) {
-					alert("Cal omplir el títol i el cos del tweet.");
-					return;
-				}
+				var textBody = $("#tweetBody").val().trim();
+				if (!textBody) { alert("Cal escriure el contingut."); return; }
+				var category = $("#tweetCategory").val() || "";
+				var location = $("#tweetLocation").val().trim();
+				var title = category || textBody.substring(0, 80);
 				var fileInput = $("#tweetPicture")[0];
 				var formData = new FormData();
 				formData.append("title", title);
 				formData.append("textBody", textBody);
+				if (category) formData.append("category", category);
+				if (location) formData.append("location", location);
 				if (fileInput && fileInput.files.length > 0) {
 					formData.append("picture", fileInput.files[0]);
 				}
 				$.ajax({
-					type: "POST",
-					url: "AddTweet",
-					data: formData,
-					processData: false,
-					contentType: false,
+					type: "POST", url: "AddTweet",
+					data: formData, processData: false, contentType: false,
 					success: function () {
-						$("#tweetTitle").val("");
-						$("#tweetBody").text("");
+						$("#tweetBody").val("");
+						$("#tweetCategory").val("");
+						$("#tweetLocation").val("");
 						if (fileInput) fileInput.value = "";
-						$("#iterator").load("Tweets");
+						$("#charCount").text("0");
+						var activeFilter = $(".pc-filter-btn.active").data("cat") || "";
+						loadTweets(activeFilter);
+						/* redirect back to home */
+						$('#content').load("Timeline", function () { lucide.createIcons(); });
 					}
 				});
 			});
@@ -143,94 +152,88 @@
 			/* Like tweet */
 			$(document).on("click", ".likeTweet", function (event) {
 				event.preventDefault();
-				var id = $(this).parent().attr("id");
+				var id = $(this).closest('[id]').attr("id");
 				$.post("AddLike", { id: id }, function () {
-					$("#iterator").load("Tweets");
+					$("#iterator").load("Tweets", function () { lucide.createIcons(); });
 				});
 			});
 
-			/* Unlike tweet (toggle) */
+			/* Unlike tweet */
 			$(document).on("click", ".unlikeTweet", function (event) {
 				event.preventDefault();
-				var id = $(this).parent().attr("id");
+				var id = $(this).closest('[id]').attr("id");
 				$.post("DelLike", { id: id }, function () {
-					$("#iterator").load("Tweets");
+					$("#iterator").load("Tweets", function () { lucide.createIcons(); });
 				});
 			});
 
-			/* Obrir/tancar secció de comentaris */
+			/* Toggle comments */
 			$(document).on("click", ".toggleComments", function (event) {
 				event.preventDefault();
-				var tweetId = $(this).parent().attr("id");
+				var tweetId = $(this).closest('[id]').attr("id");
 				var section = $("#comments-" + tweetId);
 				if (section.is(":hidden")) {
 					section.show();
 					if (section.find(".commentsList").is(":empty")) {
-						section.find(".commentsList").load("Comments?id=" + tweetId);
+						section.find(".commentsList").load("Comments?id=" + tweetId, function () { lucide.createIcons(); });
 					}
 				} else {
 					section.hide();
 				}
 			});
 
-			/* Afegir comentari */
+			/* Add comment */
 			$(document).on("click", ".addComment", function (event) {
 				event.preventDefault();
 				var section = $(this).closest('[id^="comments-"]');
 				var tweetId = section.attr("id").replace("comments-", "");
-				var title = section.find(".commentTitle").val().trim();
-				var textBody = section.find(".commentBody").text().trim();
-				if (!title || !textBody) {
-					alert("Cal omplir el títol i el cos del comentari.");
-					return;
-				}
+				var textBody = section.find(".commentBody").val().trim();
+				var title = textBody.substring(0, 80) || "Comentari";
+				if (!textBody) { alert("Cal escriure un comentari."); return; }
 				$.post("AddTweet", { title: title, textBody: textBody, parentId: tweetId }, function () {
-					section.find(".commentTitle").val("");
-					section.find(".commentBody").text("");
+					section.find(".commentBody").val("");
 					section.find(".commentsList").load("Comments?id=" + tweetId, function () {
-						$("#" + tweetId + " .commentCount").text(section.find(".commentsList > div").length);
+						lucide.createIcons();
+						$("#" + tweetId + " .commentCount").text(section.find(".commentsList .comment-card").length);
 					});
 				});
 			});
 
-			/* Mostrar/amagar formulari de resposta a un comentari */
+			/* Toggle reply */
 			$(document).on("click", ".toggleReply", function (event) {
 				event.preventDefault();
 				$(this).siblings(".replyForm").toggle();
 			});
 
-			/* Enviar resposta a un comentari (nested: parentId = comment id) */
+			/* Add reply */
 			$(document).on("click", ".addReply", function (event) {
 				event.preventDefault();
 				var replyForm = $(this).closest(".replyForm");
 				var parentId = replyForm.attr("data-parent");
 				var rootTweetId = replyForm.attr("data-root");
-				var title = replyForm.find(".replyTitle").val().trim();
-				var textBody = replyForm.find(".replyBody").text().trim();
-				if (!title || !textBody) {
-					alert("Cal omplir el títol i el cos de la resposta.");
-					return;
-				}
+				var textBody = replyForm.find(".replyBody").val().trim();
+				var title = textBody.substring(0, 80) || "Resposta";
+				if (!textBody) { alert("Cal escriure una resposta."); return; }
 				$.post("AddTweet", { title: title, textBody: textBody, parentId: parentId }, function () {
-					replyForm.find(".replyTitle").val("");
-					replyForm.find(".replyBody").text("");
-					replyForm.hide();
+					replyForm.find(".replyBody").val("").hide();
 					var section = $("#comments-" + rootTweetId);
 					section.find(".commentsList").load("Comments?id=" + rootTweetId, function () {
-						$("#" + rootTweetId + " .commentCount").text(section.find(".commentsList > div").length);
+						lucide.createIcons();
+						$("#" + rootTweetId + " .commentCount").text(section.find(".commentsList .comment-card").length);
 					});
 				});
 			});
 
-			/* Eliminar comentari propi (cascade: DB esborra fills automàticament) */
+			/* Delete comment */
 			$(document).on("click", ".delComment", function (event) {
 				event.preventDefault();
-				var commentId = $(this).parent().attr("id");
+				var commentId = $(this).closest('[id]').attr("id");
 				var section = $(this).closest('[id^="comments-"]');
 				var tweetId = section.attr("id").replace("comments-", "");
 				$.post("DelTweet", { id: commentId }, function () {
 					section.find(".commentsList").load("Comments?id=" + tweetId, function () {
-						$("#" + tweetId + " .commentCount").text(section.find(".commentsList > div").length);
+						lucide.createIcons();
+						$("#" + tweetId + " .commentCount").text(section.find(".commentsList .comment-card").length);
 					});
 				});
 			});
@@ -238,65 +241,69 @@
 			/* Delete tweet */
 			$(document).on("click", ".delTweet", function (event) {
 				event.preventDefault();
-				var id = $(this).parent().attr("id");
+				var id = $(this).closest('[id]').attr("id");
 				$.post("DelTweet", { id: id }, function () {
-					$("#iterator").load("Tweets");
+					$("#iterator").load("Tweets", function () { lucide.createIcons(); });
 				});
 			});
 
-			/* Accessibility: toggle dark/light theme */
+			/* Category filter */
+			$(document).on("click", ".pc-filter-btn", function () {
+				$(".pc-filter-btn").removeClass("active");
+				$(this).addClass("active");
+				var cat = $(this).data("cat");
+				loadTweets(cat);
+			});
+
+			/* Char counter for textarea */
+			$(document).on("input", "#tweetBody", function () {
+				$("#charCount").text($(this).val().length);
+			});
+
+			/* Accessibility: theme */
 			$(document).on("click", "#toggleTheme", function () {
 				$("body").toggleClass("dark-mode");
 				var isDark = $("body").hasClass("dark-mode");
 				localStorage.setItem("theme", isDark ? "dark" : "light");
-				$(this).find("i").toggleClass("fa-moon-o fa-sun-o");
-				var lang = localStorage.getItem("lang") || "ca";
-				$(this).find("span")
-					.attr("data-ca", isDark ? "Mode clar" : "Mode fosc")
-					.attr("data-en", isDark ? "Light mode" : "Dark mode")
-					.text(isDark ? (lang === "ca" ? "Mode clar" : "Light mode") : (lang === "ca" ? "Mode fosc" : "Dark mode"));
+				$("#toggleTheme, #toggleLight").toggleClass("active");
+				lucide.createIcons();
+			});
+			$(document).on("click", "#toggleLight", function () {
+				$("body").removeClass("dark-mode");
+				localStorage.setItem("theme", "light");
+				$("#toggleLight").addClass("active");
+				$("#toggleTheme").removeClass("active");
 			});
 
-			/* Accessibility: font size */
-			$(document).on("click", "#fontSmall", function () {
-				$("body").removeClass("font-small font-normal font-large").addClass("font-small");
-				localStorage.setItem("fontSize", "small");
-				$("#fontSmall, #fontNormal, #fontLarge").removeClass("w3-theme");
-				$(this).addClass("w3-theme");
-			});
-			$(document).on("click", "#fontNormal", function () {
-				$("body").removeClass("font-small font-normal font-large").addClass("font-normal");
-				localStorage.setItem("fontSize", "normal");
-				$("#fontSmall, #fontNormal, #fontLarge").removeClass("w3-theme");
-				$(this).addClass("w3-theme");
-			});
-			$(document).on("click", "#fontLarge", function () {
-				$("body").removeClass("font-small font-normal font-large").addClass("font-large");
-				localStorage.setItem("fontSize", "large");
-				$("#fontSmall, #fontNormal, #fontLarge").removeClass("w3-theme");
-				$(this).addClass("w3-theme");
+			/* Accessibility: font */
+			$(document).on("click", ".font-toggle-btn", function () {
+				var size = $(this).data("size");
+				$("body").removeClass("font-small font-normal font-large").addClass("font-" + size);
+				localStorage.setItem("fontSize", size);
+				$(".font-toggle-btn").removeClass("active");
+				$(this).addClass("active");
 			});
 
 			/* Accessibility: language */
 			$(document).on("click", "#langCA", function () {
-				localStorage.setItem("lang", "ca");
-				App.currentLang = "ca";
+				localStorage.setItem("lang", "ca"); App.currentLang = "ca";
 				App.applyLang("ca");
-				$("#langCA, #langEN").removeClass("w3-theme");
-				$(this).addClass("w3-theme");
+				$("#langCA").addClass("active"); $("#langEN").removeClass("active");
 			});
 			$(document).on("click", "#langEN", function () {
-				localStorage.setItem("lang", "en");
-				App.currentLang = "en";
+				localStorage.setItem("lang", "en"); App.currentLang = "en";
 				App.applyLang("en");
-				$("#langCA, #langEN").removeClass("w3-theme");
-				$(this).addClass("w3-theme");
+				$("#langEN").addClass("active"); $("#langCA").removeClass("active");
 			});
 		};
 
-		App.stack = function () {
-			$("#stack").toggleClass("w3-show");
-		};
+		/* Load tweets filtered by category */
+		function loadTweets(cat) {
+			var url = cat ? "Tweets?category=" + encodeURIComponent(cat) : "Tweets";
+			$("#iterator").load(url, function () { lucide.createIcons(); });
+		}
+
+		App.stack = function () { $("#pc-stack").toggleClass("pc-stack-open"); };
 
 		App.applyLang = function (lang) {
 			$("[data-ca][data-en]").each(function () {
@@ -314,42 +321,22 @@
 
 		$(document).ready(function () {
 			App.init();
-			App.applyAccessibility();
 		});
 	</script>
-
 </head>
 
 <body>
+	<div id="navigation"></div>
 
-	<!-- Begin Navigation -->
-	<div class="w3-theme w3-top" id="navigation"> </div>
-	<!-- End Navigation -->
-
-	<!-- Begin Content -->
-	<div class="w3-row-padding" style="margin-top: 50px;margin-bottom: 75px">
-
-		<!-- Left Column -->
-		<div class="w3-container w3-col m3 w3-hide-small">
-			<div id="lcolumn"> </div>
-		</div>
-		<!-- Middle Column -->
-		<div class="w3-container w3-col m6">
-			<div id="content"> </div>
-		</div>
-		<!-- Right Column -->
-		<div class="w3-container w3-col m3 w3-hide-small">
-			<div id="rcolumn"> </div>
-		</div>
-
+	<div id="page-wrapper">
+		<div id="lcolumn"></div>
+		<div id="content"></div>
+		<div id="rcolumn"></div>
 	</div>
-	<!-- End Content -->
 
-	<!-- Footer -->
-	<footer class="w3-container w3-theme w3-bottom">
-		<p>Pompeu Fabra University @2026</p>
+	<footer class="pc-footer">
+		<span>Sobre nosaltres · Ajuda · Condicions</span>
 	</footer>
-
 </body>
 
 </html>

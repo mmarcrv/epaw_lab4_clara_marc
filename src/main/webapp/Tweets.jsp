@@ -2,47 +2,76 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <c:forEach var="t" items="${tweets}">
-  <div id="${t.id}" class="w3-container w3-card w3-section w3-white w3-round w3-animate-opacity">
-    <br>
-    <img src="${user.picture}" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:50px">
-    <span class="w3-right w3-opacity w3-small"> ${t.time} </span>
-    <h5 class="w3-margin-bottom-0"> ${t.uname} </h5>
-    <hr class="w3-clear">
-    <h6> ${t.title} </h6>
-    <p> ${t.textBody} </p>
+  <div id="${t.id}" class="tweet-card">
+    <div class="tweet-header">
+      <div class="pc-avatar">
+        <c:choose>
+          <c:when test="${not empty user.picture}">
+            <img src="${user.picture}" alt="avatar">
+          </c:when>
+          <c:otherwise>${t.uname.substring(0,1).toUpperCase()}</c:otherwise>
+        </c:choose>
+      </div>
+      <div class="tweet-meta">
+        <div class="tweet-username">${t.uname}</div>
+        <div class="tweet-handle">@${t.uname.toLowerCase().replace(' ','_')}</div>
+      </div>
+      <span class="tweet-time">${t.time}</span>
+    </div>
+
+    <div class="tweet-badges">
+      <c:if test="${not empty t.category}">
+        <span class="pc-badge pc-badge-cat">${t.category}</span>
+      </c:if>
+      <c:if test="${not empty t.location}">
+        <span class="pc-badge pc-badge-loc">
+          <i data-lucide="map-pin"></i>${t.location}
+        </span>
+      </c:if>
+    </div>
+
+    <div class="tweet-body">${t.textBody}</div>
+
     <c:if test="${not empty t.picture}">
-      <img src="${t.picture}" alt="Tweet image" style="max-width:100%; max-height:400px; border-radius:8px; margin-bottom:8px; display:block">
-    </c:if>
-    <c:choose>
-      <c:when test="${likedIds.contains(t.id)}">
-        <button type="button" class="unlikeTweet w3-button w3-margin-bottom" style="color:#e0245e; background:none; padding:4px 8px;">
-            <i class="fa fa-heart"></i> ${t.likes}
-        </button>
-      </c:when>
-      <c:otherwise>
-        <button type="button" class="likeTweet w3-button w3-margin-bottom" style="color:#657786; background:none; padding:4px 8px;">
-            <i class="fa fa-heart-o"></i> ${t.likes}
-        </button>
-      </c:otherwise>
-    </c:choose>
-    <button type="button" class="toggleComments w3-button w3-margin-bottom" style="color:#657786; background:none; padding:4px 8px;">
-        <i class="fa fa-comment-o"></i> <span class="commentCount">${t.comments}</span>
-    </button>
-    <c:if test="${t.userId == user.id}">
-      <button type="button" class="delTweet w3-button w3-red w3-margin-bottom">
-          <i class="fa fa-trash"></i>
-      </button>
+      <img src="${t.picture}" alt="imatge" class="tweet-image">
     </c:if>
 
-    <div id="comments-${t.id}" style="display:none; margin-top:8px">
-      <div class="w3-container w3-light-grey w3-round" style="padding:8px">
-        <input class="commentTitle w3-input w3-border w3-white w3-small w3-margin-bottom" type="text" placeholder="Títol del comentari..." maxlength="255">
-        <p class="commentBody w3-border w3-white w3-padding w3-small" contenteditable="true" style="min-height:36px"> </p>
-        <button type="button" class="addComment w3-button w3-theme w3-small">
-            <i class="fa fa-reply"></i> Respondre
+    <div class="tweet-actions">
+      <c:choose>
+        <c:when test="${likedIds.contains(t.id)}">
+          <button class="tweet-action-btn liked unlikeTweet">
+            <i data-lucide="heart"></i> ${t.likes}
+          </button>
+        </c:when>
+        <c:otherwise>
+          <button class="tweet-action-btn likeTweet">
+            <i data-lucide="heart"></i> ${t.likes}
+          </button>
+        </c:otherwise>
+      </c:choose>
+
+      <button class="tweet-action-btn toggleComments">
+        <i data-lucide="message-circle"></i>
+        <span class="commentCount">${t.comments}</span>
+      </button>
+
+      <c:if test="${t.userId == user.id}">
+        <button class="tweet-del-btn delTweet">
+          <i data-lucide="trash-2"></i>
         </button>
+      </c:if>
+    </div>
+
+    <div id="comments-${t.id}" style="display:none">
+      <div class="comments-section">
+        <div class="comment-form">
+          <textarea class="pc-input commentBody" placeholder="Escriu un comentari..." rows="2" style="resize:none"></textarea>
+          <button class="addComment pc-btn pc-btn-primary" style="align-self:flex-end; padding:7px 16px; font-size:0.85rem">
+            <i data-lucide="send"></i> Comentar
+          </button>
+        </div>
+        <div class="commentsList"></div>
       </div>
-      <div class="commentsList" style="margin-top:6px"></div>
     </div>
   </div>
 </c:forEach>

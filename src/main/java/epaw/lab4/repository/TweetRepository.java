@@ -22,17 +22,19 @@ public class TweetRepository extends BaseRepository {
     }
 
     public void save(Tweet tweet) {
-        String query = "INSERT INTO tweets (user_id, title, picture, textBody, is_parent, parent_id) VALUES (?,?,?,?,?,?)";
+        String query = "INSERT INTO tweets (user_id, title, picture, textBody, category, location, is_parent, parent_id) VALUES (?,?,?,?,?,?,?,?)";
         try (PreparedStatement stmt = db.prepareStatement(query)) {
             stmt.setInt(1, tweet.getUserId());
             stmt.setString(2, tweet.getTitle());
             stmt.setString(3, tweet.getPicture());
             stmt.setString(4, tweet.getTextBody());
-            stmt.setBoolean(5, tweet.getIsParent());
+            stmt.setString(5, tweet.getCategory());
+            stmt.setString(6, tweet.getLocation());
+            stmt.setBoolean(7, tweet.getIsParent());
             if (tweet.getParentId() != null)
-                stmt.setInt(6, tweet.getParentId());
+                stmt.setInt(8, tweet.getParentId());
             else
-                stmt.setNull(6, Types.INTEGER);
+                stmt.setNull(8, Types.INTEGER);
             stmt.executeUpdate();
             if (tweet.getParentId() != null) {
                 Integer rootId = findRootId(tweet.getParentId());
@@ -65,7 +67,7 @@ public class TweetRepository extends BaseRepository {
     }
 
     private void collectDescendants(int parentId, List<Tweet> result) {
-        String query = "SELECT t.id, t.user_id, t.parent_id, t.title, t.picture, t.textBody, t.time, " +
+        String query = "SELECT t.id, t.user_id, t.parent_id, t.title, t.picture, t.textBody, t.category, t.location, t.time, " +
                        "t.likes, t.comments, t.is_parent, u.name AS uname " +
                        "FROM tweets t JOIN users u ON t.user_id = u.id " +
                        "WHERE t.parent_id = ? ORDER BY t.time ASC";
@@ -135,7 +137,7 @@ public class TweetRepository extends BaseRepository {
 
     /* Public timeline: all tweets, newest first */
     public Optional<List<Tweet>> findTimeline(int uid, int start, int end) {
-        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.time, " +
+        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.category, t.location, t.time, " +
                        "t.likes, t.comments, t.is_parent, t.parent_id, u.name AS uname " +
                        "FROM tweets t JOIN users u ON t.user_id = u.id " +
                        "WHERE t.is_parent = 1 ORDER BY t.time DESC LIMIT ?, ?";
@@ -149,7 +151,7 @@ public class TweetRepository extends BaseRepository {
 
     /* Following feed: own tweets + tweets from accepted follows, newest first */
     public Optional<List<Tweet>> findFollowingFeed(int uid, int start, int end) {
-        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.time, " +
+        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.category, t.location, t.time, " +
                        "t.likes, t.comments, t.is_parent, t.parent_id, u.name AS uname " +
                        "FROM tweets t JOIN users u ON t.user_id = u.id " +
                        "WHERE t.is_parent = 1 " +
@@ -167,7 +169,7 @@ public class TweetRepository extends BaseRepository {
 
     /* Only tweets by a specific user */
     public Optional<List<Tweet>> findByUser(int uid, int start, int end) {
-        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.time, " +
+        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.category, t.location, t.time, " +
                        "t.likes, t.comments, t.is_parent, t.parent_id, u.name AS uname " +
                        "FROM tweets t JOIN users u ON t.user_id = u.id " +
                        "WHERE t.user_id = ? AND t.is_parent = 1 " +
@@ -192,6 +194,8 @@ public class TweetRepository extends BaseRepository {
                 t.setTitle(rs.getString("title"));
                 t.setPicture(rs.getString("picture"));
                 t.setTextBody(rs.getString("textBody"));
+                t.setCategory(rs.getString("category"));
+                t.setLocation(rs.getString("location"));
                 t.setTime(rs.getTimestamp("time"));
                 t.setLikes(rs.getInt("likes"));
                 t.setComments(rs.getInt("comments"));

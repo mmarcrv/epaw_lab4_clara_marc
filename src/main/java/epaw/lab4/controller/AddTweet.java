@@ -37,6 +37,10 @@ public class AddTweet extends HttpServlet {
                     tweet.setUname(user.getName());
                     tweet.setTitle(title.trim());
                     tweet.setTextBody(textBody.trim());
+                    String category = request.getParameter("category");
+                    if (category != null && !category.trim().isEmpty()) tweet.setCategory(category.trim());
+                    String location = request.getParameter("location");
+                    if (location != null && !location.trim().isEmpty()) tweet.setLocation(location.trim());
                     String parentIdStr = request.getParameter("parentId");
                     if (parentIdStr != null && !parentIdStr.isEmpty()) {
                         tweet.setParentId(Integer.parseInt(parentIdStr));
@@ -58,13 +62,20 @@ public class AddTweet extends HttpServlet {
 
         String title = request.getParameter("title");
         String textBody = request.getParameter("textBody");
-        if (title == null || title.trim().isEmpty() || textBody == null || textBody.trim().isEmpty()) return;
+        if (textBody == null || textBody.trim().isEmpty()) return;
+        if (title == null || title.trim().isEmpty()) {
+            title = textBody.length() > 80 ? textBody.substring(0, 80) : textBody;
+        }
 
         Tweet tweet = new Tweet();
         tweet.setUserId(user.getId());
         tweet.setUname(user.getName());
         tweet.setTitle(title.trim());
         tweet.setTextBody(textBody.trim());
+        String category = request.getParameter("category");
+        if (category != null && !category.trim().isEmpty()) tweet.setCategory(category.trim());
+        String location = request.getParameter("location");
+        if (location != null && !location.trim().isEmpty()) tweet.setLocation(location.trim());
 
         String parentIdStr = request.getParameter("parentId");
         if (parentIdStr != null && !parentIdStr.isEmpty()) {
