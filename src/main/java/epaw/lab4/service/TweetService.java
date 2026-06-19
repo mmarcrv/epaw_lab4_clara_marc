@@ -35,4 +35,9 @@ public class TweetService {
     public List<Tweet> getTweetsByUser(int uid, int start, int end) {
         return tweetRepository.findByUser(uid, start, end).orElse(null);
     }
+
+    /* All comments/replies (recursive) for a given root tweet */
+    public List<Tweet> getComments(int parentId) {
+        return tweetRepository.findDescendants(parentId).orElse(null);
+    }
 }

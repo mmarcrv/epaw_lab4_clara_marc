@@ -8,36 +8,34 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import epaw.lab4.model.Tweet;
 import epaw.lab4.model.User;
-import epaw.lab4.service.LikeService;
 import epaw.lab4.service.TweetService;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-@WebServlet("/Tweets")
-public class Tweets extends HttpServlet {
+@WebServlet("/Comments")
+public class Comments extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Tweet> tweets = null;
         User user = null;
-        HttpSession session = request.getSession(false);
+        List<Tweet> comments = null;
 
-        Set<Integer> likedIds = new HashSet<>();
-        if (session != null) {
-            user = (User) session.getAttribute("user");
-            if (user != null) {
-                tweets = TweetService.getInstance().getTimeline(user.getId(), 0, 20);
-                likedIds = LikeService.getInstance().getLikedTweetIds(user.getId(), tweets);
-            }
+        HttpSession session = request.getSession(false);
+        if (session != null) user = (User) session.getAttribute("user");
+
+        int parentId = -1;
+        try {
+            parentId = Integer.parseInt(request.getParameter("id"));
+            comments = TweetService.getInstance().getComments(parentId);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
 
-        request.setAttribute("tweets", tweets);
         request.setAttribute("user", user);
-        request.setAttribute("likedIds", likedIds);
-        request.getRequestDispatcher("Tweets.jsp").forward(request, response);
+        request.setAttribute("comments", comments);
+        request.setAttribute("parentTweetId", parentId);
+        request.getRequestDispatcher("Comments.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

@@ -100,10 +100,25 @@
 					alert("Cal omplir el títol i el cos del tweet.");
 					return;
 				}
-				$.post("AddTweet", { title: title, textBody: textBody }, function () {
-					$("#tweetTitle").val("");
-					$("#tweetBody").text("");
-					$("#iterator").load("Tweets");
+				var fileInput = $("#tweetPicture")[0];
+				var formData = new FormData();
+				formData.append("title", title);
+				formData.append("textBody", textBody);
+				if (fileInput && fileInput.files.length > 0) {
+					formData.append("picture", fileInput.files[0]);
+				}
+				$.ajax({
+					type: "POST",
+					url: "AddTweet",
+					data: formData,
+					processData: false,
+					contentType: false,
+					success: function () {
+						$("#tweetTitle").val("");
+						$("#tweetBody").text("");
+						if (fileInput) fileInput.value = "";
+						$("#iterator").load("Tweets");
+					}
 				});
 			});
 
@@ -113,6 +128,92 @@
 				var id = $(this).parent().attr("id");
 				$.post("AddLike", { id: id }, function () {
 					$("#iterator").load("Tweets");
+				});
+			});
+
+			/* Unlike tweet (toggle) */
+			$(document).on("click", ".unlikeTweet", function (event) {
+				event.preventDefault();
+				var id = $(this).parent().attr("id");
+				$.post("DelLike", { id: id }, function () {
+					$("#iterator").load("Tweets");
+				});
+			});
+
+			/* Obrir/tancar secció de comentaris */
+			$(document).on("click", ".toggleComments", function (event) {
+				event.preventDefault();
+				var tweetId = $(this).parent().attr("id");
+				var section = $("#comments-" + tweetId);
+				if (section.is(":hidden")) {
+					section.show();
+					if (section.find(".commentsList").is(":empty")) {
+						section.find(".commentsList").load("Comments?id=" + tweetId);
+					}
+				} else {
+					section.hide();
+				}
+			});
+
+			/* Afegir comentari */
+			$(document).on("click", ".addComment", function (event) {
+				event.preventDefault();
+				var section = $(this).closest('[id^="comments-"]');
+				var tweetId = section.attr("id").replace("comments-", "");
+				var title = section.find(".commentTitle").val().trim();
+				var textBody = section.find(".commentBody").text().trim();
+				if (!title || !textBody) {
+					alert("Cal omplir el títol i el cos del comentari.");
+					return;
+				}
+				$.post("AddTweet", { title: title, textBody: textBody, parentId: tweetId }, function () {
+					section.find(".commentTitle").val("");
+					section.find(".commentBody").text("");
+					section.find(".commentsList").load("Comments?id=" + tweetId, function () {
+						$("#" + tweetId + " .commentCount").text(section.find(".commentsList > div").length);
+					});
+				});
+			});
+
+			/* Mostrar/amagar formulari de resposta a un comentari */
+			$(document).on("click", ".toggleReply", function (event) {
+				event.preventDefault();
+				$(this).siblings(".replyForm").toggle();
+			});
+
+			/* Enviar resposta a un comentari (nested: parentId = comment id) */
+			$(document).on("click", ".addReply", function (event) {
+				event.preventDefault();
+				var replyForm = $(this).closest(".replyForm");
+				var parentId = replyForm.attr("data-parent");
+				var rootTweetId = replyForm.attr("data-root");
+				var title = replyForm.find(".replyTitle").val().trim();
+				var textBody = replyForm.find(".replyBody").text().trim();
+				if (!title || !textBody) {
+					alert("Cal omplir el títol i el cos de la resposta.");
+					return;
+				}
+				$.post("AddTweet", { title: title, textBody: textBody, parentId: parentId }, function () {
+					replyForm.find(".replyTitle").val("");
+					replyForm.find(".replyBody").text("");
+					replyForm.hide();
+					var section = $("#comments-" + rootTweetId);
+					section.find(".commentsList").load("Comments?id=" + rootTweetId, function () {
+						$("#" + rootTweetId + " .commentCount").text(section.find(".commentsList > div").length);
+					});
+				});
+			});
+
+			/* Eliminar comentari propi (cascade: DB esborra fills automàticament) */
+			$(document).on("click", ".delComment", function (event) {
+				event.preventDefault();
+				var commentId = $(this).parent().attr("id");
+				var section = $(this).closest('[id^="comments-"]');
+				var tweetId = section.attr("id").replace("comments-", "");
+				$.post("DelTweet", { id: commentId }, function () {
+					section.find(".commentsList").load("Comments?id=" + tweetId, function () {
+						$("#" + tweetId + " .commentCount").text(section.find(".commentsList > div").length);
+					});
 				});
 			});
 

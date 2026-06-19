@@ -34,14 +34,101 @@ public class TweetRepository extends BaseRepository {
             else
                 stmt.setNull(6, Types.INTEGER);
             stmt.executeUpdate();
+            if (tweet.getParentId() != null) {
+                Integer rootId = findRootId(tweet.getParentId());
+                incrementComments(rootId != null ? rootId : tweet.getParentId());
+            }
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
     public void delete(Integer id, Integer userId) {
+        Integer parentId = getParentId(id);
+        int totalToRemove = 1 + (parentId != null ? countDescendants(id) : 0);
         String query = "DELETE FROM tweets WHERE id = ? AND user_id = ?";
         try (PreparedStatement stmt = db.prepareStatement(query)) {
             stmt.setInt(1, id);
             stmt.setInt(2, userId);
+            int rows = stmt.executeUpdate();
+            if (rows > 0 && parentId != null) {
+                Integer rootId = findRootId(parentId);
+                decrementComments(rootId != null ? rootId : parentId, totalToRemove);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    /* All descendants (recursive) of a root tweet, ordered by time */
+    public Optional<List<Tweet>> findDescendants(int rootId) {
+        List<Tweet> result = new ArrayList<>();
+        collectDescendants(rootId, result);
+        result.sort((a, b) -> a.getTime().compareTo(b.getTime()));
+        return Optional.of(result);
+    }
+
+    private void collectDescendants(int parentId, List<Tweet> result) {
+        String query = "SELECT t.id, t.user_id, t.parent_id, t.title, t.picture, t.textBody, t.time, " +
+                       "t.likes, t.comments, t.is_parent, u.name AS uname " +
+                       "FROM tweets t JOIN users u ON t.user_id = u.id " +
+                       "WHERE t.parent_id = ? ORDER BY t.time ASC";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, parentId);
+            List<Tweet> children = mapRows(stmt);
+            for (Tweet child : children) {
+                result.add(child);
+                collectDescendants(child.getId(), result);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    private Integer getParentId(int tweetId) {
+        String query = "SELECT parent_id FROM tweets WHERE id = ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, tweetId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int pid = rs.getInt("parent_id");
+                    return rs.wasNull() ? null : pid;
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    /* Walk up the tree to find the root tweet id */
+    private Integer findRootId(int tweetId) {
+        Integer parentId = getParentId(tweetId);
+        if (parentId == null) return tweetId;
+        return findRootId(parentId);
+    }
+
+    /* Count all descendants of a tweet (not including itself) */
+    private int countDescendants(int tweetId) {
+        int count = 0;
+        String query = "SELECT id FROM tweets WHERE parent_id = ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, tweetId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    count++;
+                    count += countDescendants(rs.getInt("id"));
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return count;
+    }
+
+    private void incrementComments(int tweetId) {
+        String query = "UPDATE tweets SET comments = comments + 1 WHERE id = ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, tweetId);
+            stmt.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    private void decrementComments(int tweetId, int count) {
+        String query = "UPDATE tweets SET comments = MAX(0, comments - ?) WHERE id = ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, count);
+            stmt.setInt(2, tweetId);
             stmt.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
