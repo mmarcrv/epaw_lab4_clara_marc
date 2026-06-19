@@ -243,14 +243,78 @@
 					$("#iterator").load("Tweets");
 				});
 			});
+
+			/* Accessibility: toggle dark/light theme */
+			$(document).on("click", "#toggleTheme", function () {
+				$("body").toggleClass("dark-mode");
+				var isDark = $("body").hasClass("dark-mode");
+				localStorage.setItem("theme", isDark ? "dark" : "light");
+				$(this).find("i").toggleClass("fa-moon-o fa-sun-o");
+				var lang = localStorage.getItem("lang") || "ca";
+				$(this).find("span")
+					.attr("data-ca", isDark ? "Mode clar" : "Mode fosc")
+					.attr("data-en", isDark ? "Light mode" : "Dark mode")
+					.text(isDark ? (lang === "ca" ? "Mode clar" : "Light mode") : (lang === "ca" ? "Mode fosc" : "Dark mode"));
+			});
+
+			/* Accessibility: font size */
+			$(document).on("click", "#fontSmall", function () {
+				$("body").removeClass("font-small font-normal font-large").addClass("font-small");
+				localStorage.setItem("fontSize", "small");
+				$("#fontSmall, #fontNormal, #fontLarge").removeClass("w3-theme");
+				$(this).addClass("w3-theme");
+			});
+			$(document).on("click", "#fontNormal", function () {
+				$("body").removeClass("font-small font-normal font-large").addClass("font-normal");
+				localStorage.setItem("fontSize", "normal");
+				$("#fontSmall, #fontNormal, #fontLarge").removeClass("w3-theme");
+				$(this).addClass("w3-theme");
+			});
+			$(document).on("click", "#fontLarge", function () {
+				$("body").removeClass("font-small font-normal font-large").addClass("font-large");
+				localStorage.setItem("fontSize", "large");
+				$("#fontSmall, #fontNormal, #fontLarge").removeClass("w3-theme");
+				$(this).addClass("w3-theme");
+			});
+
+			/* Accessibility: language */
+			$(document).on("click", "#langCA", function () {
+				localStorage.setItem("lang", "ca");
+				App.currentLang = "ca";
+				App.applyLang("ca");
+				$("#langCA, #langEN").removeClass("w3-theme");
+				$(this).addClass("w3-theme");
+			});
+			$(document).on("click", "#langEN", function () {
+				localStorage.setItem("lang", "en");
+				App.currentLang = "en";
+				App.applyLang("en");
+				$("#langCA, #langEN").removeClass("w3-theme");
+				$(this).addClass("w3-theme");
+			});
 		};
 
 		App.stack = function () {
 			$("#stack").toggleClass("w3-show");
 		};
 
+		App.applyLang = function (lang) {
+			$("[data-ca][data-en]").each(function () {
+				$(this).text($(this).attr("data-" + lang));
+			});
+		};
+
+		App.applyAccessibility = function () {
+			var theme = localStorage.getItem("theme") || "light";
+			var fontSize = localStorage.getItem("fontSize") || "normal";
+			App.currentLang = localStorage.getItem("lang") || "ca";
+			$("body").toggleClass("dark-mode", theme === "dark");
+			$("body").removeClass("font-small font-normal font-large").addClass("font-" + fontSize);
+		};
+
 		$(document).ready(function () {
 			App.init();
+			App.applyAccessibility();
 		});
 	</script>
 

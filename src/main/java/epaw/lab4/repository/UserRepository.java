@@ -70,6 +70,29 @@ public class UserRepository extends BaseRepository {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    public Optional<User> findById(int id) {
+        String query = "SELECT id, name, picture, firstName, lastName, email, dateOfBirth, comarca, role FROM users WHERE id = ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User();
+                    u.setId(rs.getInt("id"));
+                    u.setName(rs.getString("name"));
+                    u.setPicture(rs.getString("picture"));
+                    u.setFirstName(rs.getString("firstName"));
+                    u.setLastName(rs.getString("lastName"));
+                    u.setEmail(rs.getString("email"));
+                    u.setDateOfBirth(rs.getString("dateOfBirth"));
+                    u.setComarca(rs.getString("comarca"));
+                    u.setRole(rs.getString("role"));
+                    return Optional.of(u);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return Optional.empty();
+    }
+
     public Optional<User> findByName(String name) {
         String query = "SELECT id, name, password, picture, firstName, lastName, email, dateOfBirth, comarca, role FROM users WHERE name = ?";
         try (PreparedStatement stmt = db.prepareStatement(query)) {

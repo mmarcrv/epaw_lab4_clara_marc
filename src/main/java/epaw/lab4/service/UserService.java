@@ -113,6 +113,10 @@ public class UserService {
         return errors;
     }
 
+    public User getUserById(int id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
     public Map<String, String> login(User user) {
         Map<String, String> errors = new HashMap<>();
         if (!userRepository.checkLogin(user)) {

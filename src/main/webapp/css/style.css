@@ -7,3 +7,51 @@ input.w3-input:valid {
 input.w3-input:invalid {
 	border-left: 4px solid red !important;
 }
+
+/* Dark mode */
+body.dark-mode {
+	background-color: #1e1e2e !important;
+	color: #cdd6f4 !important;
+}
+body.dark-mode .w3-white {
+	background-color: #313244 !important;
+	color: #cdd6f4 !important;
+}
+body.dark-mode .w3-card {
+	background-color: #313244 !important;
+	color: #cdd6f4 !important;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
+}
+body.dark-mode .w3-light-grey {
+	background-color: #45475a !important;
+	color: #cdd6f4 !important;
+}
+body.dark-mode .w3-pale-blue {
+	background-color: #3b4261 !important;
+	color: #cdd6f4 !important;
+}
+body.dark-mode .w3-input,
+body.dark-mode [contenteditable="true"],
+body.dark-mode p[contenteditable] {
+	background-color: #1e1e2e !important;
+	color: #cdd6f4 !important;
+	border-color: #585b70 !important;
+}
+body.dark-mode .w3-border {
+	border-color: #585b70 !important;
+}
+body.dark-mode .w3-opacity {
+	color: #a6adc8 !important;
+	opacity: 1 !important;
+}
+body.dark-mode hr {
+	border-color: #585b70 !important;
+}
+body.dark-mode .w3-button:not(.w3-theme):not(.w3-red):not(.w3-green):hover {
+	background-color: #45475a !important;
+}
+
+/* Font sizes */
+body.font-small { font-size: 13px; }
+body.font-normal { font-size: 16px; }
+body.font-large { font-size: 20px; }
