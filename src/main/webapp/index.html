@@ -71,12 +71,11 @@
 				}
 			});
 
-			/* Follow user */
+			/* Follow user (envia sol·licitud, l'usuari desapareix de suggeriments) */
 			$(document).on("click", ".followUser", function (event) {
 				event.preventDefault();
 				var id = $(this).parent().attr("id");
 				$.post("Follow", { id: id }, function () {
-					$("#content").load("Followed");
 					$("#rcolumn").load("NotFollowed");
 				});
 			});
@@ -88,6 +87,25 @@
 				$.post("Unfollow", { id: id }, function () {
 					$("#content").load("Followed");
 					$("#rcolumn").load("NotFollowed");
+				});
+			});
+
+			/* Acceptar sol·licitud de seguiment */
+			$(document).on("click", ".acceptRequest", function (event) {
+				event.preventDefault();
+				var from = $(this).parent().attr("id");
+				$.post("AcceptFollow", { from: from }, function () {
+					$("#content").load("Requests");
+					$("#lcolumn").load("Profile");
+				});
+			});
+
+			/* Rebutjar sol·licitud de seguiment */
+			$(document).on("click", ".rejectRequest", function (event) {
+				event.preventDefault();
+				var from = $(this).parent().attr("id");
+				$.post("RejectFollow", { from: from }, function () {
+					$("#content").load("Requests");
 				});
 			});
 

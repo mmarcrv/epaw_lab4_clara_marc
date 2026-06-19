@@ -26,9 +26,14 @@ public class TweetService {
         tweetRepository.delete(id, userId);
     }
 
-    /* Timeline: tweets from uid + people they follow */
+    /* Public timeline: all tweets */
     public List<Tweet> getTimeline(int uid, int start, int end) {
         return tweetRepository.findTimeline(uid, start, end).orElse(null);
+    }
+
+    /* Following feed: own tweets + tweets from accepted follows */
+    public List<Tweet> getFollowingFeed(int uid, int start, int end) {
+        return tweetRepository.findFollowingFeed(uid, start, end).orElse(null);
     }
 
     /* Only tweets posted by uid */

@@ -11,25 +11,25 @@ import epaw.lab4.service.FollowService;
 
 import java.io.IOException;
 
-@WebServlet("/Profile")
-public class Profile extends HttpServlet {
+@WebServlet("/RejectFollow")
+public class RejectFollow extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
             User user = (User) session.getAttribute("user");
             if (user != null) {
-                int following = FollowService.getInstance().countFollowing(user.getId());
-                int followers = FollowService.getInstance().countFollowers(user.getId());
-                request.setAttribute("following", following);
-                request.setAttribute("followers", followers);
+                try {
+                    int from = Integer.parseInt(request.getParameter("from"));
+                    FollowService.getInstance().rejectRequest(from, user.getId());
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        request.getRequestDispatcher("Profile.jsp").forward(request, response);
     }
 
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }

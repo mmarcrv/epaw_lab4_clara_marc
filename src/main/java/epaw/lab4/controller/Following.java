@@ -6,29 +6,38 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import epaw.lab4.model.Tweet;
 import epaw.lab4.model.User;
-import epaw.lab4.service.FollowService;
+import epaw.lab4.service.LikeService;
+import epaw.lab4.service.TweetService;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-@WebServlet("/NotFollowed")
-public class NotFollowed extends HttpServlet {
+@WebServlet("/Following")
+public class Following extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> users = null;
+        List<Tweet> tweets = null;
+        User user = null;
         HttpSession session = request.getSession(false);
 
+        Set<Integer> likedIds = new HashSet<>();
         if (session != null) {
-            User user = (User) session.getAttribute("user");
+            user = (User) session.getAttribute("user");
             if (user != null) {
-                users = FollowService.getInstance().getNotFollowing(user.getId(), 0, 3);
+                tweets = TweetService.getInstance().getFollowingFeed(user.getId(), 0, 20);
+                likedIds = LikeService.getInstance().getLikedTweetIds(user.getId(), tweets);
             }
         }
 
-        request.setAttribute("users", users);
-        request.getRequestDispatcher("NotFollowed.jsp").forward(request, response);
+        request.setAttribute("tweets", tweets);
+        request.setAttribute("user", user);
+        request.setAttribute("likedIds", likedIds);
+        request.getRequestDispatcher("Tweets.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

@@ -10,26 +10,27 @@ import epaw.lab4.model.User;
 import epaw.lab4.service.FollowService;
 
 import java.io.IOException;
+import java.util.List;
 
-@WebServlet("/Profile")
-public class Profile extends HttpServlet {
+@WebServlet("/Requests")
+public class Requests extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<User> requests = null;
         HttpSession session = request.getSession(false);
+
         if (session != null) {
             User user = (User) session.getAttribute("user");
             if (user != null) {
-                int following = FollowService.getInstance().countFollowing(user.getId());
-                int followers = FollowService.getInstance().countFollowers(user.getId());
-                request.setAttribute("following", following);
-                request.setAttribute("followers", followers);
+                requests = FollowService.getInstance().getPendingRequests(user.getId(), 0, 50);
             }
         }
-        request.getRequestDispatcher("Profile.jsp").forward(request, response);
+
+        request.setAttribute("requests", requests);
+        request.getRequestDispatcher("Requests.jsp").forward(request, response);
     }
 
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }

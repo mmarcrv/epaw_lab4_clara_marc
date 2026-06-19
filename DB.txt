@@ -38,6 +38,7 @@ CREATE TABLE likes (
 CREATE TABLE follows (
   u_following INTEGER NOT NULL,
   u_followed INTEGER NOT NULL,
+  status VARCHAR(10) NOT NULL DEFAULT 'pending',
   followed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (u_following, u_followed),
   FOREIGN KEY (u_following) REFERENCES users(id) ON DELETE CASCADE,

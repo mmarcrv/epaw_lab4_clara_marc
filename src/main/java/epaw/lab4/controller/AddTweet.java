@@ -74,8 +74,11 @@ public class AddTweet extends HttpServlet {
             tweet.setIsParent(true);
         }
 
-        String picturePath = savePicture(request.getPart("picture"), user.getId());
-        if (picturePath != null) tweet.setPicture(picturePath);
+        String ct = request.getContentType();
+        if (ct != null && ct.startsWith("multipart/")) {
+            String picturePath = savePicture(request.getPart("picture"), user.getId());
+            if (picturePath != null) tweet.setPicture(picturePath);
+        }
 
         TweetService.getInstance().add(tweet);
     }

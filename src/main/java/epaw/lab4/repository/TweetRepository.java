@@ -133,13 +133,27 @@ public class TweetRepository extends BaseRepository {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    /* Timeline: tweets from user + people they follow, newest first */
+    /* Public timeline: all tweets, newest first */
     public Optional<List<Tweet>> findTimeline(int uid, int start, int end) {
         String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.time, " +
                        "t.likes, t.comments, t.is_parent, t.parent_id, u.name AS uname " +
                        "FROM tweets t JOIN users u ON t.user_id = u.id " +
+                       "WHERE t.is_parent = 1 ORDER BY t.time DESC LIMIT ?, ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setInt(1, start);
+            stmt.setInt(2, end);
+            return Optional.of(mapRows(stmt));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return Optional.empty();
+    }
+
+    /* Following feed: own tweets + tweets from accepted follows, newest first */
+    public Optional<List<Tweet>> findFollowingFeed(int uid, int start, int end) {
+        String query = "SELECT t.id, t.user_id, t.title, t.picture, t.textBody, t.time, " +
+                       "t.likes, t.comments, t.is_parent, t.parent_id, u.name AS uname " +
+                       "FROM tweets t JOIN users u ON t.user_id = u.id " +
                        "WHERE t.is_parent = 1 " +
-                       "AND (t.user_id = ? OR t.user_id IN (SELECT u_followed FROM follows WHERE u_following = ?)) " +
+                       "AND (t.user_id = ? OR t.user_id IN (SELECT u_followed FROM follows WHERE u_following = ? AND status = 'accepted')) " +
                        "ORDER BY t.time DESC LIMIT ?, ?";
         try (PreparedStatement stmt = db.prepareStatement(query)) {
             stmt.setInt(1, uid);
