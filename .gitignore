@@ -46,3 +46,6 @@ EXTERNAL_RESOURCES/*
 
 # Jasper JSP Compiler Output
 jsp/
+
+# Claude Code
+.claude/
