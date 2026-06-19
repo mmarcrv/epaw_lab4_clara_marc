@@ -36,31 +36,44 @@
       <img src="${t.picture}" alt="imatge" class="tweet-image">
     </c:if>
 
-    <div class="tweet-actions">
-      <c:choose>
-        <c:when test="${likedIds.contains(t.id)}">
-          <button class="tweet-action-btn liked unlikeTweet">
-            <i data-lucide="heart"></i> ${t.likes}
-          </button>
-        </c:when>
-        <c:otherwise>
-          <button class="tweet-action-btn likeTweet">
-            <i data-lucide="heart"></i> ${t.likes}
-          </button>
-        </c:otherwise>
-      </c:choose>
+    <c:choose>
+      <c:when test="${not empty user}">
+        <div class="tweet-actions">
+          <c:choose>
+            <c:when test="${likedIds.contains(t.id)}">
+              <button class="tweet-action-btn liked unlikeTweet">
+                <i data-lucide="heart"></i> ${t.likes}
+              </button>
+            </c:when>
+            <c:otherwise>
+              <button class="tweet-action-btn likeTweet">
+                <i data-lucide="heart"></i> ${t.likes}
+              </button>
+            </c:otherwise>
+          </c:choose>
 
-      <button class="tweet-action-btn toggleComments">
-        <i data-lucide="message-circle"></i>
-        <span class="commentCount">${t.comments}</span>
-      </button>
+          <button class="tweet-action-btn toggleComments">
+            <i data-lucide="message-circle"></i>
+            <span class="commentCount">${t.comments}</span>
+          </button>
 
-      <c:if test="${t.userId == user.id}">
-        <button class="tweet-del-btn delTweet">
-          <i data-lucide="trash-2"></i>
-        </button>
-      </c:if>
-    </div>
+          <c:if test="${t.userId == user.id}">
+            <button class="tweet-del-btn delTweet">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </c:if>
+        </div>
+      </c:when>
+      <c:otherwise>
+        <div class="tweet-actions-guest">
+          <i data-lucide="heart"></i> ${t.likes}
+          &nbsp;·&nbsp;
+          <i data-lucide="message-circle"></i> ${t.comments}
+          &nbsp;·&nbsp;
+          <a class="menu tweet-guest-login" href="Login">Inicia sessió per interactuar</a>
+        </div>
+      </c:otherwise>
+    </c:choose>
 
     <div id="comments-${t.id}" style="display:none">
       <div class="comments-section">

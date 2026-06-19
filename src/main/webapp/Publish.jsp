@@ -1,9 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
-<script>
-$(document).ready(function(){ App.setLayout('simple'); });
-</script>
-
 <div class="pc-publish-card">
   <h2 class="pc-publish-title">Crear nova publicació</h2>
 
@@ -53,20 +49,12 @@ $(document).ready(function(){ App.setLayout('simple'); });
 
   <div class="pc-publish-actions">
     <button class="menu pc-btn pc-btn-ghost" href="Timeline">Cancel·lar</button>
-    <button id="addTweet" class="pc-btn pc-btn-primary">
+    <button id="addTweet" type="button" class="pc-btn pc-btn-primary">
       <i data-lucide="send"></i> Publicar
     </button>
   </div>
 </div>
 
 <script>
-$(document).ready(function(){
-  lucide.createIcons();
-  $('#tweetBody').on('input', function(){ $('#charCount').text($(this).val().length); });
-  /* Cancel goes back to home */
-  $('.pc-btn-ghost[href="Timeline"]').on('click', function(e){
-    e.preventDefault();
-    $('#content').load('Timeline', function(){ lucide.createIcons(); });
-  });
-});
+$(document).ready(function(){ App.setLayout('simple'); lucide.createIcons(); });
 </script>

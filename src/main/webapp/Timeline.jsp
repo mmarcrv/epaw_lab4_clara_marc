@@ -3,8 +3,15 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
+  <c:choose>
+    <c:when test="${not empty sessionScope.user}">
   App.setLayout('full');
   $('#rcolumn').load('HomeRight', function(){ lucide.createIcons(); });
+    </c:when>
+    <c:otherwise>
+  App.setLayout('simple');
+    </c:otherwise>
+  </c:choose>
   $('#iterator').load('Tweets', function(){ lucide.createIcons(); });
 });
 </script>

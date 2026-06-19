@@ -280,6 +280,14 @@ input, textarea, select { font-family: inherit; }
 .tweet-del-btn:hover { background: var(--red-bg); color: var(--red-dark); }
 .tweet-del-btn svg { width: 14px; height: 14px; }
 
+.tweet-actions-guest {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 6px; font-size: 0.83rem; color: var(--text-muted);
+}
+.tweet-actions-guest svg { width: 14px; height: 14px; vertical-align: middle; }
+.tweet-guest-login { color: var(--green-1); font-size: 0.82rem; }
+.tweet-guest-login:hover { text-decoration: underline; }
+
 /* ── Comment section ─────────────────────────────────── */
 .comments-section {
   margin-top: 12px; padding-top: 12px;

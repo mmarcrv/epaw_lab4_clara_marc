@@ -133,19 +133,17 @@
 				if (fileInput && fileInput.files.length > 0) {
 					formData.append("picture", fileInput.files[0]);
 				}
+				var $btn = $(this);
+				$btn.prop('disabled', true);
 				$.ajax({
 					type: "POST", url: "AddTweet",
 					data: formData, processData: false, contentType: false,
 					success: function () {
-						$("#tweetBody").val("");
-						$("#tweetCategory").val("");
-						$("#tweetLocation").val("");
-						if (fileInput) fileInput.value = "";
-						$("#charCount").text("0");
-						var activeFilter = $(".pc-filter-btn.active").data("cat") || "";
-						loadTweets(activeFilter);
-						/* redirect back to home */
 						$('#content').load("Timeline", function () { lucide.createIcons(); });
+					},
+					error: function () {
+						$btn.prop('disabled', false);
+						alert("Error en publicar. Torna-ho a intentar.");
 					}
 				});
 			});
@@ -153,7 +151,7 @@
 			/* Like tweet */
 			$(document).on("click", ".likeTweet", function (event) {
 				event.preventDefault();
-				var id = $(this).closest('[id]').attr("id");
+				var id = $(this).closest('.tweet-card').attr('id');
 				$.post("AddLike", { id: id }, function () {
 					$("#iterator").load("Tweets", function () { lucide.createIcons(); });
 				});
@@ -162,7 +160,7 @@
 			/* Unlike tweet */
 			$(document).on("click", ".unlikeTweet", function (event) {
 				event.preventDefault();
-				var id = $(this).closest('[id]').attr("id");
+				var id = $(this).closest('.tweet-card').attr('id');
 				$.post("DelLike", { id: id }, function () {
 					$("#iterator").load("Tweets", function () { lucide.createIcons(); });
 				});
@@ -171,7 +169,7 @@
 			/* Toggle comments */
 			$(document).on("click", ".toggleComments", function (event) {
 				event.preventDefault();
-				var tweetId = $(this).closest('[id]').attr("id");
+				var tweetId = $(this).closest('.tweet-card').attr('id');
 				var section = $("#comments-" + tweetId);
 				if (section.is(":hidden")) {
 					section.show();
@@ -195,7 +193,7 @@
 					section.find(".commentBody").val("");
 					section.find(".commentsList").load("Comments?id=" + tweetId, function () {
 						lucide.createIcons();
-						$("#" + tweetId + " .commentCount").text(section.find(".commentsList .comment-card").length);
+						section.closest('.tweet-card').find('.commentCount').text(section.find(".commentsList .comment-card").length);
 					});
 				});
 			});
@@ -203,7 +201,7 @@
 			/* Toggle reply */
 			$(document).on("click", ".toggleReply", function (event) {
 				event.preventDefault();
-				$(this).siblings(".replyForm").toggle();
+				$(this).closest(".comment-content").find(".replyForm").toggle();
 			});
 
 			/* Add reply */
@@ -216,11 +214,11 @@
 				var title = textBody.substring(0, 80) || "Resposta";
 				if (!textBody) { alert("Cal escriure una resposta."); return; }
 				$.post("AddTweet", { title: title, textBody: textBody, parentId: parentId }, function () {
-					replyForm.find(".replyBody").val("").hide();
+					replyForm.find(".replyBody").val(""); replyForm.hide();
 					var section = $("#comments-" + rootTweetId);
 					section.find(".commentsList").load("Comments?id=" + rootTweetId, function () {
 						lucide.createIcons();
-						$("#" + rootTweetId + " .commentCount").text(section.find(".commentsList .comment-card").length);
+						section.closest('.tweet-card').find('.commentCount').text(section.find(".commentsList .comment-card").length);
 					});
 				});
 			});
@@ -228,13 +226,13 @@
 			/* Delete comment */
 			$(document).on("click", ".delComment", function (event) {
 				event.preventDefault();
-				var commentId = $(this).closest('[id]').attr("id");
+				var commentId = $(this).closest('.comment-card').attr('id');
 				var section = $(this).closest('[id^="comments-"]');
 				var tweetId = section.attr("id").replace("comments-", "");
 				$.post("DelTweet", { id: commentId }, function () {
 					section.find(".commentsList").load("Comments?id=" + tweetId, function () {
 						lucide.createIcons();
-						$("#" + tweetId + " .commentCount").text(section.find(".commentsList .comment-card").length);
+						section.closest('.tweet-card').find('.commentCount').text(section.find(".commentsList .comment-card").length);
 					});
 				});
 			});
@@ -242,7 +240,7 @@
 			/* Delete tweet */
 			$(document).on("click", ".delTweet", function (event) {
 				event.preventDefault();
-				var id = $(this).closest('[id]').attr("id");
+				var id = $(this).closest('.tweet-card').attr('id');
 				$.post("DelTweet", { id: id }, function () {
 					$("#iterator").load("Tweets", function () { lucide.createIcons(); });
 				});

@@ -21,23 +21,23 @@ public class Tweets extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Tweet> tweets = null;
         User user = null;
         HttpSession session = request.getSession(false);
+        if (session != null) user = (User) session.getAttribute("user");
 
         String categoryFilter = request.getParameter("category");
+        int uid = (user != null) ? user.getId() : 0;
+        List<Tweet> tweets = TweetService.getInstance().getTimeline(uid, 0, 20);
+
+        if (categoryFilter != null && !categoryFilter.isEmpty()) {
+            tweets = tweets.stream()
+                .filter(t -> categoryFilter.equals(t.getCategory()))
+                .collect(java.util.stream.Collectors.toList());
+        }
+
         Set<Integer> likedIds = new HashSet<>();
-        if (session != null) {
-            user = (User) session.getAttribute("user");
-            if (user != null) {
-                tweets = TweetService.getInstance().getTimeline(user.getId(), 0, 20);
-                if (categoryFilter != null && !categoryFilter.isEmpty()) {
-                    tweets = tweets.stream()
-                        .filter(t -> categoryFilter.equals(t.getCategory()))
-                        .collect(java.util.stream.Collectors.toList());
-                }
-                likedIds = LikeService.getInstance().getLikedTweetIds(user.getId(), tweets);
-            }
+        if (user != null && tweets != null) {
+            likedIds = LikeService.getInstance().getLikedTweetIds(user.getId(), tweets);
         }
 
         request.setAttribute("tweets", tweets);
