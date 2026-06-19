@@ -56,8 +56,4 @@
 </div>
 </c:if>
 
-<div class="pc-card" style="font-size:0.78rem;color:var(--text-muted)">
-  Sobre nosaltres · Ajuda · Condicions
-</div>
-
 <script>lucide.createIcons();</script>
