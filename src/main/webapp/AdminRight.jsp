@@ -21,19 +21,6 @@
 .admin-stat-icon.green { background: var(--green-bg2); color: #3a7d60; }
 .admin-stat-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1px; }
 .admin-stat-value { font-size: 1.3rem; font-weight: 700; color: var(--text); }
-
-.admin-quick-btn {
-  display: block; width: 100%; padding: 10px 16px;
-  border-radius: var(--radius-sm); border: none;
-  font-size: 0.88rem; font-weight: 600; cursor: pointer;
-  margin-bottom: 8px; text-align: left;
-  transition: opacity .15s;
-}
-.admin-quick-btn:hover { opacity: .85; }
-.admin-quick-btn.red   { background: var(--red-bg); color: var(--red-dark); }
-.admin-quick-btn.green { background: var(--green-bg2); color: #3a7d60; }
-.admin-quick-btn.dark  { background: var(--green-1); color: white; }
-
 .admin-activity-item {
   display: flex; align-items: flex-start; gap: 8px;
   padding: 7px 0; border-bottom: 1px solid var(--green-bg2);
@@ -96,23 +83,6 @@
   </div>
 </div>
 
-<!-- Accions ràpides -->
-<div class="pc-right-section">
-  <div class="pc-right-title">Accions ràpides</div>
-  <button class="admin-quick-btn red admin-scroll-reports">
-    <i data-lucide="flag" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px"></i>
-    Veure tots els reports
-  </button>
-  <button class="admin-quick-btn green">
-    <i data-lucide="users" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px"></i>
-    Gestionar usuaris
-  </button>
-  <button class="admin-quick-btn dark">
-    <i data-lucide="download" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px"></i>
-    Exportar dades
-  </button>
-</div>
-
 <!-- Activitat recent -->
 <div class="pc-right-section">
   <div class="pc-right-title">Activitat recent</div>
@@ -134,8 +104,5 @@
 <script>
 $(document).ready(function(){
   lucide.createIcons();
-  $(document).on('click', '.admin-scroll-reports', function(){
-    $('html, body').animate({ scrollTop: 0 }, 300);
-  });
 });
 </script>

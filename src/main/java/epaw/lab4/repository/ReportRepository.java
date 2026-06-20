@@ -133,27 +133,24 @@ public class ReportRepository extends BaseRepository {
         } catch (SQLException e) { e.printStackTrace(); }
 
         // 2. Active users (banned are role='banned')
-        // We add a base of 1230 as a simulation, similar to the mockup 1,234
         String qUsers = "SELECT COUNT(*) FROM users WHERE role != 'banned'";
         try (PreparedStatement stmt = db.prepareStatement(qUsers);
              ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) stats.put("activeUsers", 1230 + rs.getInt(1));
+            if (rs.next()) stats.put("activeUsers", rs.getInt(1));
         } catch (SQLException e) { e.printStackTrace(); }
 
         // 3. Posts today
-        // We add a base of 80 to match mockup 87
         String qPosts = "SELECT COUNT(*) FROM tweets WHERE is_parent = 1 AND date(time) = date('now')";
         try (PreparedStatement stmt = db.prepareStatement(qPosts);
              ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) stats.put("postsToday", 80 + rs.getInt(1));
+            if (rs.next()) stats.put("postsToday", rs.getInt(1));
         } catch (SQLException e) { e.printStackTrace(); }
 
         // 4. Comments today
-        // We add a base of 240 to match mockup 245
         String qComments = "SELECT COUNT(*) FROM tweets WHERE is_parent = 0 AND date(time) = date('now')";
         try (PreparedStatement stmt = db.prepareStatement(qComments);
              ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) stats.put("commentsToday", 240 + rs.getInt(1));
+            if (rs.next()) stats.put("commentsToday", rs.getInt(1));
         } catch (SQLException e) { e.printStackTrace(); }
 
         return stats;
