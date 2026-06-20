@@ -38,9 +38,9 @@ $(document).ready(function(){
       </div>
     </div>
     <c:if test="${profileUser.id == sessionUser.id}">
-      <button class="pc-btn pc-btn-ghost" style="font-size:0.85rem;padding:7px 14px">
+      <a href="EditProfile" class="menu pc-btn pc-btn-ghost" style="font-size:0.85rem;padding:7px 14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
         <i data-lucide="settings"></i> Editar perfil
-      </button>
+      </a>
     </c:if>
   </div>
 

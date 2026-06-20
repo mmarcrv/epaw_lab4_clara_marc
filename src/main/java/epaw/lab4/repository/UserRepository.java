@@ -115,4 +115,20 @@ public class UserRepository extends BaseRepository {
         } catch (SQLException e) { e.printStackTrace(); }
         return Optional.empty();
     }
+
+    public void update(User user) {
+        String query = "UPDATE users SET name = ?, password = ?, picture = ?, firstName = ?, lastName = ?, email = ?, dateOfBirth = ?, comarca = ? WHERE id = ?";
+        try (PreparedStatement stmt = db.prepareStatement(query)) {
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getPassword());
+            stmt.setString(3, user.getPicture());
+            stmt.setString(4, user.getFirstName());
+            stmt.setString(5, user.getLastName());
+            stmt.setString(6, user.getEmail());
+            stmt.setString(7, user.getDateOfBirth());
+            stmt.setString(8, user.getComarca());
+            stmt.setInt(9, user.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
 }
