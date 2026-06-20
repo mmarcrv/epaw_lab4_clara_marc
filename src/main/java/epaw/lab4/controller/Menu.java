@@ -22,8 +22,10 @@ public class Menu extends HttpServlet {
 		HttpSession session = request.getSession(false);
 		String view = "MenuNotLogged.html";
 
-		if (session != null && session.getAttribute("user") != null)
-			view = "MenuLogged.html";
+		if (session != null && session.getAttribute("user") != null) {
+			view = "MenuLogged.jsp";
+			request.setAttribute("user", session.getAttribute("user"));
+		}
 
 		request.getRequestDispatcher(view).forward(request, response);
 	}
