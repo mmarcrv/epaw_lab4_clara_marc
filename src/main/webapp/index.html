@@ -246,6 +246,31 @@
 				});
 			});
 
+			/* Report tweet — open modal */
+			var _reportTweetId = null;
+			$(document).on("click", ".reportTweet", function (event) {
+				event.preventDefault();
+				_reportTweetId = $(this).closest('.tweet-card').attr('id');
+				$('#reportModal').css('display', 'flex');
+				lucide.createIcons();
+			});
+			$(document).on("click", "#cancelReport", function () {
+				$('#reportModal').hide();
+				_reportTweetId = null;
+			});
+			$(document).on("click", "#confirmReport", function () {
+				if (!_reportTweetId) return;
+				var reason = $('#reportReason').val();
+				var $btn = $(this);
+				$btn.prop('disabled', true);
+				$.post("ReportTweet", { tweetId: _reportTweetId, reason: reason })
+					.always(function () {
+						$('#reportModal').hide();
+						_reportTweetId = null;
+						$btn.prop('disabled', false);
+					});
+			});
+
 			/* Category filter */
 			$(document).on("click", ".pc-filter-btn", function () {
 				$(".pc-filter-btn").removeClass("active");
@@ -331,6 +356,26 @@
 		<div id="lcolumn"></div>
 		<div id="content"></div>
 		<div id="rcolumn"></div>
+	</div>
+
+	<!-- Report modal -->
+	<div id="reportModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center;">
+		<div style="background:var(--white);border-radius:var(--radius);padding:28px 24px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.18);border:1px solid var(--border)">
+			<div style="font-weight:700;font-size:1rem;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+				<i data-lucide="flag" style="width:18px;height:18px;color:#e53e3e"></i> Reportar publicació
+			</div>
+			<p style="color:var(--text-muted);font-size:0.83rem;margin-bottom:14px">Selecciona el motiu del report:</p>
+			<select id="reportReason" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.88rem;margin-bottom:16px;background:var(--bg)">
+				<option value="Spam">Spam</option>
+				<option value="Contingut inapropiat">Contingut inapropiat</option>
+				<option value="Desinformació">Desinformació</option>
+				<option value="Assetjament">Assetjament</option>
+			</select>
+			<div style="display:flex;gap:8px;justify-content:flex-end">
+				<button id="cancelReport" style="padding:7px 16px;border-radius:var(--radius-pill);border:1px solid var(--border);background:none;font-size:0.85rem;cursor:pointer;color:var(--text-muted)">Cancel·lar</button>
+				<button id="confirmReport" style="padding:7px 16px;border-radius:var(--radius-pill);border:none;background:#e53e3e;color:white;font-size:0.85rem;font-weight:600;cursor:pointer">Reportar</button>
+			</div>
+		</div>
 	</div>
 
 </body>

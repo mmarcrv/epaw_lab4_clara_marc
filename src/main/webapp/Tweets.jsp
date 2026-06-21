@@ -62,6 +62,11 @@
               <i data-lucide="trash-2"></i>
             </button>
           </c:if>
+          <c:if test="${t.userId != user.id}">
+            <button class="tweet-action-btn reportTweet" title="Reportar publicació" style="margin-left:auto;color:var(--text-muted)">
+              <i data-lucide="flag"></i>
+            </button>
+          </c:if>
         </div>
       </c:when>
       <c:otherwise>
