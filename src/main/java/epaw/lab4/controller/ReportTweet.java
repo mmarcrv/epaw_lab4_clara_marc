@@ -1,7 +1,7 @@
 package epaw.lab4.controller;
 
 import epaw.lab4.model.User;
-import epaw.lab4.repository.ReportRepository;
+import epaw.lab4.service.ReportService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,11 +15,11 @@ import java.io.IOException;
 public class ReportTweet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private ReportRepository reportRepository;
+    private ReportService reportService;
 
     @Override
     public void init() throws ServletException {
-        reportRepository = ReportRepository.getInstance();
+        reportService = ReportService.getInstance();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ReportTweet extends HttpServlet {
 
         try {
             int tweetId = Integer.parseInt(tweetIdStr);
-            reportRepository.saveReport(tweetId, user.getId(), reason.trim());
+            reportService.report(tweetId, user.getId(), reason.trim());
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }

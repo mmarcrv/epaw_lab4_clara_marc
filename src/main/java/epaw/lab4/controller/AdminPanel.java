@@ -1,60 +1,44 @@
 package epaw.lab4.controller;
 
+import epaw.lab4.model.User;
+import epaw.lab4.service.ReportService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import epaw.lab4.model.User;
-import epaw.lab4.model.ReportedItem;
-import epaw.lab4.repository.ReportRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet("/AdminPanel")
 public class AdminPanel extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private ReportRepository reportRepository;
+    private ReportService reportService;
 
     @Override
     public void init() throws ServletException {
-        reportRepository = ReportRepository.getInstance();
+        reportService = ReportService.getInstance();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        User user = null;
-        if (session != null) {
-            user = (User) session.getAttribute("user");
-        }
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null || !"admin".equals(user.getRole())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accés denegat.");
             return;
         }
 
-        Map<String, Integer> stats = reportRepository.getStats();
-        List<ReportedItem> reportedPosts = reportRepository.getReportedPosts();
-        List<ReportedItem> reportedComments = reportRepository.getReportedComments();
+        request.setAttribute("reportedPosts", reportService.getReportedPosts());
+        request.setAttribute("reportedComments", reportService.getReportedComments());
 
-        @SuppressWarnings("unchecked")
-        List<String> recentActivity = (List<String>) session.getAttribute("recentActivity");
-        if (recentActivity == null) {
-            recentActivity = new ArrayList<>();
-            recentActivity.add("Benvingut al Panell d'Administració");
-            session.setAttribute("recentActivity", recentActivity);
-        }
-
-        request.setAttribute("stats", stats);
-        request.setAttribute("reportedPosts", reportedPosts);
-        request.setAttribute("reportedComments", reportedComments);
+        List<String> recentActivity = getRecentActivity(session);
         request.setAttribute("recentActivity", recentActivity);
 
         request.getRequestDispatcher("AdminPanel.jsp").forward(request, response);
@@ -64,10 +48,7 @@ public class AdminPanel extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        User user = null;
-        if (session != null) {
-            user = (User) session.getAttribute("user");
-        }
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null || !"admin".equals(user.getRole())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accés denegat.");
@@ -77,38 +58,44 @@ public class AdminPanel extends HttpServlet {
         String action = request.getParameter("action");
         String idStr = request.getParameter("id");
         String authorName = request.getParameter("authorName");
-        
-        @SuppressWarnings("unchecked")
-        List<String> recentActivity = (List<String>) session.getAttribute("recentActivity");
-        if (recentActivity == null) {
-            recentActivity = new ArrayList<>();
-            session.setAttribute("recentActivity", recentActivity);
-        }
+
+        List<String> recentActivity = getRecentActivity(session);
 
         if (action != null && idStr != null) {
             try {
                 int id = Integer.parseInt(idStr);
                 if ("deletePost".equals(action) || "deleteComment".equals(action)) {
-                    reportRepository.deleteTweet(id);
-                    String itemType = "deletePost".equals(action) ? "Post" : "Comentari";
-                    recentActivity.add(0, itemType + " eliminat (ID: " + id + ") fa 1 min");
+                    reportService.deleteTweet(id);
+                    String type = "deletePost".equals(action) ? "Post" : "Comentari";
+                    recentActivity.add(0, type + " eliminat (ID: " + id + ")");
                 } else if ("ignoreReport".equals(action)) {
-                    reportRepository.ignoreReport(id);
-                    recentActivity.add(0, "Report ignorat (ID: " + id + ") fa 1 min");
+                    reportService.ignoreReport(id);
+                    recentActivity.add(0, "Report ignorat (ID: " + id + ")");
                 } else if ("banUser".equals(action)) {
-                    reportRepository.banUser(id);
-                    recentActivity.add(0, "Usuari bannejat (" + (authorName != null ? authorName : "ID: " + id) + ") fa 1 min");
+                    String tweetIdStr = request.getParameter("tweetId");
+                    int tweetId = (tweetIdStr != null) ? Integer.parseInt(tweetIdStr) : 0;
+                    reportService.banUser(id, tweetId);
+                    recentActivity.add(0, "Usuari bannejat (" + (authorName != null ? authorName : "ID: " + id) + ")");
                 }
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
         }
 
-        if (recentActivity.size() > 5) {
-            recentActivity.subList(5, recentActivity.size()).clear();
-        }
+        if (recentActivity.size() > 5) recentActivity.subList(5, recentActivity.size()).clear();
         session.setAttribute("recentActivity", recentActivity);
 
         doGet(request, response);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getRecentActivity(HttpSession session) {
+        List<String> activity = (List<String>) session.getAttribute("recentActivity");
+        if (activity == null) {
+            activity = new ArrayList<>();
+            activity.add("Benvingut al Panell d'Administració");
+            session.setAttribute("recentActivity", activity);
+        }
+        return activity;
     }
 }
